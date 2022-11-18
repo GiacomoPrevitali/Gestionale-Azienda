@@ -37,7 +37,7 @@ namespace Server
             IPAddress ipAddress = System.Net.IPAddress.Parse("127.0.0.1");
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 5000);
             listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
+            byte[] msg = new Byte[1024];
 
             try
             {
@@ -56,8 +56,10 @@ namespace Server
                         var l = reader.ReadLine();
                         string[] v = l.Split(';');
 
-                        MessageBox.Show("fgg");
-                        MessageBox.Show(v[0]);
+                        msg = Encoding.ASCII.GetBytes(Convert.ToString(l));
+                        handler.Send(msg);
+                        handler.Shutdown(SocketShutdown.Both);
+
 
 
                     }
@@ -78,10 +80,16 @@ namespace Server
                     MessageBox.Show("ww " + data);
 
 
-                    byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString("Return"));
-                    handler.Send(msg);
-                    handler.Shutdown(SocketShutdown.Both);
-                    handler.Close();
+              
+                    //byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString("Return"));
+                   // handler.Send(msg);
+                    //handler.Shutdown(SocketShutdown.Both);
+                    //if (-1== Convert.ToInt32(info[0]))
+                   // {
+                        
+                        handler.Close();
+                  //  }
+                    
 
                 }
 
@@ -113,6 +121,19 @@ namespace Server
 
             }
 
+        }
+        private void Add()
+        {
+            string Codice = "tps11";
+            using (StreamWriter writetext = new StreamWriter(@"../../../File/Ordini/" + Codice +".csv"))
+            {
+                writetext.WriteLine(data);
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Add();
         }
     }
 }

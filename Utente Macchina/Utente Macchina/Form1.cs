@@ -18,7 +18,8 @@ namespace Utente_Macchina
         IPAddress ipAddress;
         IPEndPoint remoteEP;
         Socket Sender;
-        string n_Ordine;
+        string n_Ordine; 
+        string r;
         public Form1()
         {
             InitializeComponent();
@@ -34,7 +35,7 @@ namespace Utente_Macchina
         private void button1_Click(object sender, EventArgs e)
         {
             //MessageBox.Show();
-            string r;
+            
             try
             {
 
@@ -45,17 +46,18 @@ namespace Utente_Macchina
 
                 try
                 {
-                    Sender.Connect(remoteEP);
+                    int bytesRec = Sender.Receive(bytes);
+                    r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                    MessageBox.Show(r);
 
 
 
-                    byte[] msg = Encoding.ASCII.GetBytes(n_Ordine+txt_PezziProdotti.Text + ";" + Txt_Macchina.Text + ";" + Txt_Operatore.Text + DateTime.Now.ToString("dddd, dd MMMM yyyy")+";<EOF>");
+                    byte[] msg = Encoding.ASCII.GetBytes(n_Ordine+";"+txt_PezziProdotti.Text + ";" + Txt_Macchina.Text + ";" + Txt_Operatore.Text + DateTime.Now.ToString("dddd, dd MMMM yyyy")+";<EOF>");
 
                     int bytesSent = Sender.Send(msg);
 
 
-                    int bytesRec = Sender.Receive(bytes);
-                    r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                   
                     
 
                     Sender.Shutdown(SocketShutdown.Both);
@@ -85,7 +87,11 @@ namespace Utente_Macchina
         private void lsB_Ordini_SelectedIndexChanged(object sender, EventArgs e)
         {
             string Ordine=lsB_Ordini.Text;
-            n_Ordine= Ordine.Substring(0, 1);
+            if(Ordine!= null)
+            {
+                n_Ordine = Ordine.Substring(0, 1);
+            }
+           
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -98,12 +104,28 @@ namespace Utente_Macchina
                 Sender = new Socket(ipAddress.AddressFamily,
                   SocketType.Stream, ProtocolType.Tcp);
 
- 
+                Sender.Connect(remoteEP);
+                byte[] msg = Encoding.ASCII.GetBytes(Txt_Utente.Text+";<EOF>");
+
+                int bytesSent = Sender.Send(msg);
+
+                int bytesRec = Sender.Receive(bytes);
+                r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void btn_Chiudi_Click(object sender, EventArgs e)
+        {
+            byte[] msg = Encoding.ASCII.GetBytes("-1;<EOF>");
+
+            int bytesSent = Sender.Send(msg);
+
+            int bytesRec = Sender.Receive(bytes);
+            r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
         }
     }
 }
