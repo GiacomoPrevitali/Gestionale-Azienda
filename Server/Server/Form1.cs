@@ -128,8 +128,13 @@ namespace Server
             using (StreamWriter writetext = new StreamWriter(@"../../../File/Ordini/" + Codice +".csv"))
             {
                 writetext.WriteLine(data);
+                //codice+pezzi+data di scadenza
+
+
             }
         }
+
+        private void Modifica()
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -137,3 +142,10 @@ namespace Server
         }
     }
 }
+
+
+//SI CONNETTE TRAMITE UN LOGIN
+//LO ACCETTA E GLI MANDA GLI ORDINI
+//SELEZIONA, E RITORNA LE MODIFICHE
+//IL SERVER ACCETTA E MODIFICA I DATI
+//LA CONNESSIONE SI CHIUDE
