@@ -17,10 +17,10 @@ namespace Server
 {
     public partial class Form1 : Form
     {
-        Socket listener;
         Thread t;
         bool acceso = false;
         public static string data = null;
+        int User = 0;
         public Form1()
         {
             InitializeComponent();
@@ -30,77 +30,6 @@ namespace Server
         private void Form1_Load(object sender, EventArgs e)
         {
       
-        }
-        private void server()
-        {
-            byte[] bytes = new Byte[1024];
-            IPAddress ipAddress = System.Net.IPAddress.Parse("127.0.0.1");
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 5000);
-            listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            byte[] msg = new Byte[1024];
-
-            try
-            {
-
-                listener.Bind(localEndPoint);
-                listener.Listen(10);
-
-                while (true)
-                {
-                    Socket handler = listener.Accept();
-                    data = null;
-
-                    var reader = new StreamReader(@"../../../File/Database.csv");
-                    while (!reader.EndOfStream)
-                    {
-                        var l = reader.ReadLine();
-                        string[] v = l.Split(';');
-
-                        msg = Encoding.ASCII.GetBytes(Convert.ToString(l));
-                        handler.Send(msg);
-                        handler.Shutdown(SocketShutdown.Both);
-
-
-
-                    }
-
-
-
-                    while (true)
-                    {
-                        int bytesRec = handler.Receive(bytes);
-                        data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                        if (data.IndexOf("<EOF>") > -1)
-                        {
-                            break;
-                        }
-                    }
-
-                    string[] info = data.Split(';');
-                    MessageBox.Show("ww " + data);
-
-
-              
-                    //byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString("Return"));
-                   // handler.Send(msg);
-                    //handler.Shutdown(SocketShutdown.Both);
-                    //if (-1== Convert.ToInt32(info[0]))
-                   // {
-                        
-                        handler.Close();
-                  //  }
-                    
-
-                }
-
-
-            }
-
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-
-            }
         }
         private void button1_Click(object sender, EventArgs e)
         {
@@ -122,6 +51,48 @@ namespace Server
             }
 
         }
+        private void server()
+        {
+            IPAddress ipAddress = System.Net.IPAddress.Parse("127.0.0.1");
+            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 5000);
+            Socket listener = new Socket(ipAddress.AddressFamily,SocketType.Stream, ProtocolType.Tcp);
+
+            Console.WriteLine("Timeout : {0}", listener.ReceiveTimeout);
+            try
+            {
+                listener.Bind(localEndPoint);
+                listener.Listen(10);
+
+                while (true)
+                {
+                    //FARE CONTO USER
+                    //CHIUDERE TUTTO QUANDO PREMI x
+                    Console.WriteLine("Waiting for a connection...");
+
+                    Socket handler = listener.Accept();
+
+                    ClientManager clientThread = new ClientManager(handler);
+                    Thread t = new Thread(new ThreadStart(clientThread.doClient));
+                    User++;
+                    lbl_User.Text = "Utenti Connessi: "+Convert.ToString(User);
+                    t.IsBackground = true;
+                    t.Start();
+                    User--;
+                    lbl_User.Text = "Utenti Connessi: "+Convert.ToString(User);
+
+
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            Console.WriteLine("\nPress ENTER to continue...");
+            Console.Read();
+        }
+        
         private void Add()
         {
             string Codice = "tps11";
@@ -134,8 +105,7 @@ namespace Server
             }
         }
 
-        private void Modifica()
-
+        private void Modifica() { }
         private void button2_Click(object sender, EventArgs e)
         {
             Add();
@@ -143,6 +113,100 @@ namespace Server
     }
 }
 
+public class ClientManager
+{
+
+    Socket clientSocket;
+    byte[] bytes = new Byte[1024];
+    String data = "";
+
+    public ClientManager(Socket clientSocket)
+    {
+        this.clientSocket = clientSocket;
+    }
+
+    public void doClient()
+    {
+        bool check = false;
+        int c = -2;
+
+        while (data != "Quit$")
+        {
+
+            // An incoming connection needs to be processed.  
+            data = "";
+            while (data.IndexOf("<EOF>") == -1)
+            {
+                int bytesRec = clientSocket.Receive(bytes);
+                data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+            }
+            byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString(c));
+            string[] info = data.Split(';');
+            if (info[0] == "a")
+            {
+
+                var reader = new StreamReader(@"../../../File/Database.csv");
+                int lines = 0;
+                while (reader.ReadLine() != null)
+                {
+                    lines++;
+                }
+                reader.Close();
+                msg = Encoding.ASCII.GetBytes(Convert.ToString(lines));
+                //MessageBox.Show("NT"+lines);
+                clientSocket.Send(msg);
+                var reader1 = new StreamReader(@"../../../File/Database.csv");
+                while (!reader1.EndOfStream)
+                {
+                    var l = reader1.ReadLine();
+                    msg = Encoding.ASCII.GetBytes(Convert.ToString(l));
+                    //MessageBox.Show(l);
+                    clientSocket.Send(msg);
+                }
+                reader1.Close();
+
+            }
+            else
+            {
+
+
+                var reader = new StreamReader(@"../../../File/Utenti.csv");
+                while (!reader.EndOfStream)
+                {
+                    var l = reader.ReadLine();
+                    string[] v = l.Split(';');
+                    if (v[0] == info[0] && v[1] == info[1])
+                    {
+                        check = true;
+                    }
+                }
+                reader.Close();
+
+                if (check)
+                {
+                    c = 0;
+                }
+                else
+                {
+                    c = -1;
+                }
+            }
+            msg = Encoding.ASCII.GetBytes(Convert.ToString(c));
+            // Show the data on the console.  
+            Console.WriteLine("Messaggio ricevuto : {0}", data);
+
+            // Echo the data back to the client.  
+           // byte[] msg = Encoding.ASCII.GetBytes(data);
+
+            clientSocket.Send(msg);
+        }
+        MessageBox.Show("cc");
+        clientSocket.Shutdown(SocketShutdown.Both);
+        clientSocket.Close();
+        data = "";
+
+    }
+}
 
 //SI CONNETTE TRAMITE UN LOGIN
 //LO ACCETTA E GLI MANDA GLI ORDINI
