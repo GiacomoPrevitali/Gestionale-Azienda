@@ -31,8 +31,11 @@
             this.txt_NomeUtente = new System.Windows.Forms.TextBox();
             this.btn_Login = new System.Windows.Forms.Button();
             this.txt_Password = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btn_Carica = new System.Windows.Forms.Button();
             this.lsb_Ordini = new System.Windows.Forms.ListBox();
+            this.txt_qntPezzi = new System.Windows.Forms.TextBox();
+            this.txt_Operatore = new System.Windows.Forms.TextBox();
+            this.txt_Macchina = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // txt_NomeUtente
@@ -61,15 +64,15 @@
             this.txt_Password.TabIndex = 2;
             this.txt_Password.Text = "admin";
             // 
-            // button1
+            // btn_Carica
             // 
-            this.button1.Location = new System.Drawing.Point(548, 155);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btn_Carica.Location = new System.Drawing.Point(752, 115);
+            this.btn_Carica.Name = "btn_Carica";
+            this.btn_Carica.Size = new System.Drawing.Size(75, 23);
+            this.btn_Carica.TabIndex = 3;
+            this.btn_Carica.Text = "Carica";
+            this.btn_Carica.UseVisualStyleBackColor = true;
+            this.btn_Carica.Click += new System.EventHandler(this.button1_Click);
             // 
             // lsb_Ordini
             // 
@@ -80,18 +83,43 @@
             this.lsb_Ordini.TabIndex = 4;
             this.lsb_Ordini.SelectedIndexChanged += new System.EventHandler(this.lsb_Ordini_SelectedIndexChanged);
             // 
+            // txt_qntPezzi
+            // 
+            this.txt_qntPezzi.Location = new System.Drawing.Point(1099, 214);
+            this.txt_qntPezzi.Name = "txt_qntPezzi";
+            this.txt_qntPezzi.Size = new System.Drawing.Size(100, 20);
+            this.txt_qntPezzi.TabIndex = 5;
+            // 
+            // txt_Operatore
+            // 
+            this.txt_Operatore.Location = new System.Drawing.Point(1099, 262);
+            this.txt_Operatore.Name = "txt_Operatore";
+            this.txt_Operatore.Size = new System.Drawing.Size(100, 20);
+            this.txt_Operatore.TabIndex = 6;
+            // 
+            // txt_Macchina
+            // 
+            this.txt_Macchina.Location = new System.Drawing.Point(1099, 303);
+            this.txt_Macchina.Name = "txt_Macchina";
+            this.txt_Macchina.Size = new System.Drawing.Size(100, 20);
+            this.txt_Macchina.TabIndex = 7;
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1370, 814);
+            this.Controls.Add(this.txt_Macchina);
+            this.Controls.Add(this.txt_Operatore);
+            this.Controls.Add(this.txt_qntPezzi);
             this.Controls.Add(this.lsb_Ordini);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btn_Carica);
             this.Controls.Add(this.txt_Password);
             this.Controls.Add(this.btn_Login);
             this.Controls.Add(this.txt_NomeUtente);
             this.Name = "Form2";
             this.Text = "Form2";
+            this.Load += new System.EventHandler(this.Form2_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -102,7 +130,10 @@
         private System.Windows.Forms.TextBox txt_NomeUtente;
         private System.Windows.Forms.Button btn_Login;
         private System.Windows.Forms.TextBox txt_Password;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btn_Carica;
         private System.Windows.Forms.ListBox lsb_Ordini;
+        private System.Windows.Forms.TextBox txt_qntPezzi;
+        private System.Windows.Forms.TextBox txt_Operatore;
+        private System.Windows.Forms.TextBox txt_Macchina;
     }
 }

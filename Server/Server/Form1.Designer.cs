@@ -47,11 +47,13 @@
             // lbl_Stato
             // 
             this.lbl_Stato.AutoSize = true;
-            this.lbl_Stato.Location = new System.Drawing.Point(155, 44);
+            this.lbl_Stato.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Stato.Location = new System.Drawing.Point(66, 124);
             this.lbl_Stato.Name = "lbl_Stato";
-            this.lbl_Stato.Size = new System.Drawing.Size(35, 13);
+            this.lbl_Stato.Size = new System.Drawing.Size(109, 39);
             this.lbl_Stato.TabIndex = 1;
             this.lbl_Stato.Text = "label1";
+            this.lbl_Stato.Click += new System.EventHandler(this.lbl_Stato_Click);
             // 
             // button2
             // 
@@ -81,6 +83,7 @@
             this.Controls.Add(this.button2);
             this.Controls.Add(this.lbl_Stato);
             this.Controls.Add(this.button1);
+            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);

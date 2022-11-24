@@ -24,9 +24,12 @@ namespace Utente_Macchina
         IPEndPoint remoteEP;
         Socket Sender;
         string n_Ordine;
+
         private void btn_Login_Click(object sender, EventArgs e)
         {
+            Ordini o = new Ordini();
             string r;
+            bool login = false;
             try
             {
                 //Creare classe ordini e fare separatore
@@ -53,29 +56,30 @@ namespace Utente_Macchina
                     if (Convert.ToInt32(r) == 0)
                     {
                         Form1 f = new Form1();
+                        login = true;
                        // f.Show();
                     }
                     else
                     {
                         MessageBox.Show("Utente o Password errati!","Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-
-                    msg = Encoding.ASCII.GetBytes("a;<EOF>");
-                    bytesSent = Sender.Send(msg);
-                    //MessageBox.Show("aa");
-                    Console.WriteLine(r);
-                    bytesRec = Sender.Receive(bytes);
-                    int Nlines = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 0, bytesRec));
-                   // MessageBox.Show("GG"+Convert.ToString(Nlines));
-                    for(int i=0; i<Nlines; i++)
+                    if (login)
                     {
+                        msg = Encoding.ASCII.GetBytes("a;<EOF>");
+                        bytesSent = Sender.Send(msg);
+                        Console.WriteLine(r);
                         bytesRec = Sender.Receive(bytes);
-                        r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                        Console.WriteLine("O"+r);
-                        lsb_Ordini.Items.Add(r);
-                      //  MessageBox.Show(Convert.ToString(i));
+                        int Nlines = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 0, bytesRec));
+                        for (int i = 0; i < Nlines; i++)
+                        {
+                            bytesRec = Sender.Receive(bytes);
+                            r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                            string[] v = r.Split(';');
+                            o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
+                            lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna);
+                        }
+                        MessageBox.Show(Convert.ToString("gg"));
                     }
-                    MessageBox.Show(Convert.ToString("gg"));
 
                     //Sender.Shutdown(SocketShutdown.Both);
                     // Sender.Close();
@@ -103,7 +107,13 @@ namespace Utente_Macchina
 
         private void button1_Click(object sender, EventArgs e)
         {
-           
+            if (n_Ordine != null)
+            {
+                byte[] msg = Encoding.ASCII.GetBytes("b;"+n_Ordine+";"+txt_Macchina.Text + ";" + txt_Operatore.Text + ";" + txt_qntPezzi.Text + ";<EOF>");
+                int bytesSent = Sender.Send(msg);
+                MessageBox.Show("sendato");
+            }
+
         }
 
         private void lsb_Ordini_SelectedIndexChanged(object sender, EventArgs e)
@@ -115,5 +125,36 @@ namespace Utente_Macchina
             }
 
         }
+
+        private void Form2_Load(object sender, EventArgs e)
+        {
+            lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna");
+        }
     }
+}
+
+
+class Ordini
+{
+    public int Nordine { get; set; }
+    public int Npezzi { get; set; }
+    public string Cod { get; set; }
+    public string DataConsegna { get; set; }
+
+    public Ordini()
+    {
+        Nordine = 0;
+        Npezzi = 0;
+        Cod = "";
+        DataConsegna = "";
+    }
+
+    public void setOrdine(int No, int Np, string C, string Dc)
+    {
+        Nordine = No;
+        Npezzi = Np;
+        Cod = C;
+        DataConsegna = Dc;
+    }
+
 }
