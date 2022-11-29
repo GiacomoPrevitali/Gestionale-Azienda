@@ -27,9 +27,35 @@ namespace Utente_Macchina
 
         private void btn_Login_Click(object sender, EventArgs e)
         {
+           
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void lsb_Ordini_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string Ordine = lsb_Ordini.Text;
+            if (Ordine != null)
+            {
+                n_Ordine = Ordine.Substring(0, 1);
+            }
+
+        }
+
+        private void Form2_Load(object sender, EventArgs e)
+        {
+            lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna");
+        }
+
+        private void rjB_login_Click(object sender, EventArgs e)
+        {
             Ordini o = new Ordini();
             string r;
             bool login = false;
+            lsb_Ordini.Items.Clear();
             try
             {
                 //Creare classe ordini e fare separatore
@@ -46,7 +72,7 @@ namespace Utente_Macchina
                         Sender.RemoteEndPoint.ToString());
 
 
-                    byte[] msg = Encoding.ASCII.GetBytes(txt_NomeUtente.Text+";"+txt_Password.Text+ ";<EOF>");
+                    byte[] msg = Encoding.ASCII.GetBytes(txt_NomeUtente.Text + ";" + txt_Password.Text + ";<EOF>");
                     //Send
                     int bytesSent = Sender.Send(msg);
 
@@ -57,11 +83,12 @@ namespace Utente_Macchina
                     {
                         Form1 f = new Form1();
                         login = true;
-                       // f.Show();
+                        panel1.Visible = false;
+                        // f.Show();
                     }
                     else
                     {
-                        MessageBox.Show("Utente o Password errati!","Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Utente o Password errati!", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     if (login)
                     {
@@ -105,30 +132,15 @@ namespace Utente_Macchina
             //this.Hide();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void rjB_Carica_Click(object sender, EventArgs e)
         {
             if (n_Ordine != null)
             {
-                byte[] msg = Encoding.ASCII.GetBytes("b;"+n_Ordine+";"+txt_Macchina.Text + ";" + txt_Operatore.Text + ";" + txt_qntPezzi.Text + ";<EOF>");
+                byte[] msg = Encoding.ASCII.GetBytes("b;" + n_Ordine + ";" + txt_Macchina.Text + ";" + txt_Operatore.Text + ";" + txt_qntPezzi.Text + ";<EOF>");
                 int bytesSent = Sender.Send(msg);
                 MessageBox.Show("sendato");
             }
 
-        }
-
-        private void lsb_Ordini_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string Ordine = lsb_Ordini.Text;
-            if (Ordine != null)
-            {
-                n_Ordine = Ordine.Substring(0, 1);
-            }
-
-        }
-
-        private void Form2_Load(object sender, EventArgs e)
-        {
-            lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna");
         }
     }
 }

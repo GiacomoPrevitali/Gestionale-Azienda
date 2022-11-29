@@ -17,6 +17,7 @@ namespace Server
 {
     public partial class Form1 : Form
     {
+        Ordini o = new Ordini();
         Thread t;
         bool acceso = false;
         public static string data = null;
@@ -36,6 +37,7 @@ namespace Server
             if (!acceso)
             {
                 lbl_Stato.Text = "Acceso";
+                button1.Text = "Spegni";
                 lbl_Stato.ForeColor = System.Drawing.Color.Green;
                 acceso = true;
                 t = new Thread(server);
@@ -44,6 +46,7 @@ namespace Server
             }
             else
             {
+                button1.Text = "AVVIA";
                 lbl_Stato.Text = "Spento";
                 lbl_Stato.ForeColor = System.Drawing.Color.Red;
                 acceso = false;
@@ -104,17 +107,6 @@ namespace Server
 
             }
         }
-
-        private void Modifica() { }
-        private void button2_Click(object sender, EventArgs e)
-        {
-            Add();
-        }
-
-        private void lbl_Stato_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
 
@@ -162,10 +154,19 @@ public class ClientManager
                 aggiorna();
 
             }
-            else
+            else if (info[0] == "c")
             {
 
-                login();
+                string file = @"../../../File/UtentiGestionali.csv";
+                login(file,0);
+            }
+            else if (info[0] == "d")
+            {
+                Add(info);
+            }else
+            {
+                string file = @"../../../File/Utenti.csv";
+                login(file,1);
               
             } 
 
@@ -176,6 +177,36 @@ public class ClientManager
         clientSocket.Close();
         data = "";
 
+    }
+    public int Nordine()
+    {
+        var l="";
+        var reader1 = new StreamReader(@"../../../File/Database.csv");
+        while (!reader1.EndOfStream)
+        {
+            l = reader1.ReadLine();
+        }
+        string[] v = l.Split(';');
+        reader1.Close();
+        MessageBox.Show(v[0]);
+        if (v[0] == "")
+        {
+            v[0] = "0";
+        }
+
+        MessageBox.Show(v[0]);
+        return Convert.ToInt32(v[0]);
+
+    }
+    public void Add(string[] info)
+    {
+        int c= Nordine();
+        c++;
+        var writer = File.AppendText(@"../../../File/Database.csv");
+        writer.WriteLine(c+";"+info[1] + ";" + info[2] + ";" + info[3]);
+        writer.Close();
+        byte[] msg = Encoding.ASCII.GetBytes("0");
+        clientSocket.Send(msg);
     }
     public void aggiorna()
     {
@@ -191,18 +222,23 @@ public class ClientManager
         }
         reader1.Close();
     }
-    public void login()
+    public void login(string file, int d)
     {
         int c = -2;
         bool check = false;
-        
+        int i = 0;
+        if (d == 0)
+        {
+            i = 1;
+        }
         string[] info = data.Split(';');
-        var reader = new StreamReader(@"../../../File/Utenti.csv");
+        var reader = new StreamReader(file);
         while (!reader.EndOfStream)
         {
+            
             var l = reader.ReadLine();
             string[] v = l.Split(';');
-            if (v[0] == info[0] && v[1] == info[1])
+            if (v[0] == info[i] && v[1] == info[i+1])
             {
                 check = true;
             }
@@ -238,7 +274,9 @@ public class ClientManager
         {
             var l = reader1.ReadLine();
             string[] v = l.Split(';');
+            MessageBox.Show(v[0] + " "+v[1] + " " + v[2] + " " + v[3]);
             o[i].setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
+            MessageBox.Show(v[0] + " "+v[1] + " " + v[2] + " " + v[3]);
             msg = Encoding.ASCII.GetBytes(Convert.ToString(l));
             i++;
             clientSocket.Send(msg);
