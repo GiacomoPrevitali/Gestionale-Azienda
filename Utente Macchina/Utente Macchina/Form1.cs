@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Utente_Macchina
@@ -18,7 +12,7 @@ namespace Utente_Macchina
         IPAddress ipAddress;
         IPEndPoint remoteEP;
         Socket Sender;
-        string n_Ordine; 
+        string n_Ordine;
         string r;
         public Form1()
         {
@@ -98,12 +92,12 @@ namespace Utente_Macchina
 
         private void lsB_Ordini_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string Ordine=lsB_Ordini.Text;
-            if(Ordine!= null)
+            string Ordine = lsB_Ordini.Text;
+            if (Ordine != null)
             {
                 n_Ordine = Ordine.Substring(0, 1);
             }
-           
+
         }
 
     }

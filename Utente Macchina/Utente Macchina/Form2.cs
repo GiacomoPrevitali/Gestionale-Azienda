@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 
 
 namespace Utente_Macchina
@@ -24,15 +19,35 @@ namespace Utente_Macchina
         IPEndPoint remoteEP;
         Socket Sender;
         string n_Ordine;
+        Thread t;
+        bool login = false;
 
         private void btn_Login_Click(object sender, EventArgs e)
         {
-           
+            try
+            {
+                ipAddress = System.Net.IPAddress.Parse("127.0.0.1");
+                remoteEP = new IPEndPoint(ipAddress, 5000);
+                Sender = new Socket(ipAddress.AddressFamily,
+                  SocketType.Stream, ProtocolType.Tcp);
+                Sender.Connect(remoteEP);
+
+
+
+                byte[] msg = Encoding.ASCII.GetBytes("Quit$<EOF>");
+                //Send
+                int bytesSent = Sender.Send(msg);
+                this.Close();
+            }
+            catch
+            {
+                this.Close();
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void lsb_Ordini_SelectedIndexChanged(object sender, EventArgs e)
@@ -48,14 +63,44 @@ namespace Utente_Macchina
         private void Form2_Load(object sender, EventArgs e)
         {
             lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna");
+
         }
 
+        private void aggiorna()
+        {
+            while (true)
+            {
+                Thread.Sleep(5000);
+                byte[] msg = Encoding.ASCII.GetBytes("a;<EOF>");
+                int bytesSent = Sender.Send(msg);
+                // Scrivi();
+
+                this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Clear()));
+                this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna")));
+
+                string r;
+                Ordini o = new Ordini();
+                int bytesRec = Sender.Receive(bytes);
+                int Nlines = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 0, bytesRec));
+                for (int i = 0; i < Nlines; i++)
+                {
+                    bytesRec = Sender.Receive(bytes);
+                    r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                    string[] v = r.Split(';');
+                    o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
+                    this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna)));
+                }
+                MessageBox.Show(Convert.ToString("gg"));
+            }
+
+        }
         private void rjB_login_Click(object sender, EventArgs e)
         {
-            Ordini o = new Ordini();
+
             string r;
-            bool login = false;
+
             lsb_Ordini.Items.Clear();
+            lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna");
             try
             {
                 //Creare classe ordini e fare separatore
@@ -95,19 +140,9 @@ namespace Utente_Macchina
                         msg = Encoding.ASCII.GetBytes("a;<EOF>");
                         bytesSent = Sender.Send(msg);
                         Console.WriteLine(r);
-                        bytesRec = Sender.Receive(bytes);
-                        int Nlines = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 0, bytesRec));
-                        for (int i = 0; i < Nlines; i++)
-                        {
-                            bytesRec = Sender.Receive(bytes);
-                            r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                            string[] v = r.Split(';');
-                            o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
-                            lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna);
-                        }
-                        MessageBox.Show(Convert.ToString("gg"));
+                        Scrivi();
                     }
-
+                    //controllo n ultimo ordine
                     //Sender.Shutdown(SocketShutdown.Both);
                     // Sender.Close();
 
@@ -130,17 +165,61 @@ namespace Utente_Macchina
                 MessageBox.Show(ex.Message);
             }
             //this.Hide();
+            t = new Thread(aggiorna);
+            t.IsBackground = true;
+            t.Start();
         }
+        private void Scrivi()
+        {
+            string r;
+            Ordini o = new Ordini();
+            int bytesRec = Sender.Receive(bytes);
+            int Nlines = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 0, bytesRec));
 
+            for (int i = 0; i < Nlines; i++)
+            {
+                bytesRec = Sender.Receive(bytes);
+                r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                Console.WriteLine(r);
+                string[] v = r.Split(';');
+                o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
+                lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna);
+            }
+            MessageBox.Show(Convert.ToString("gg"));
+        }
         private void rjB_Carica_Click(object sender, EventArgs e)
         {
             if (n_Ordine != null)
             {
                 byte[] msg = Encoding.ASCII.GetBytes("b;" + n_Ordine + ";" + txt_Macchina.Text + ";" + txt_Operatore.Text + ";" + txt_qntPezzi.Text + ";<EOF>");
                 int bytesSent = Sender.Send(msg);
-                MessageBox.Show("sendato");
             }
 
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!login)
+                {
+                    ipAddress = System.Net.IPAddress.Parse("127.0.0.1");
+                    remoteEP = new IPEndPoint(ipAddress, 5000);
+                    Sender = new Socket(ipAddress.AddressFamily,
+                      SocketType.Stream, ProtocolType.Tcp);
+                    Sender.Connect(remoteEP);
+                }
+
+
+                byte[] msg = Encoding.ASCII.GetBytes("Quit$<EOF>");
+                //Send
+                int bytesSent = Sender.Send(msg);
+                this.Close();
+            }
+            catch
+            {
+                this.Close();
+            }
         }
     }
 }
