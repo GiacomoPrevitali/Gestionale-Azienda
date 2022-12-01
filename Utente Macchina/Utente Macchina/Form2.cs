@@ -52,10 +52,17 @@ namespace Utente_Macchina
 
         private void lsb_Ordini_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string Ordine = lsb_Ordini.Text;
-            if (Ordine != null)
+            try
             {
-                n_Ordine = Ordine.Substring(0, 1);
+                string Ordine = lsb_Ordini.Text;
+                if (Ordine != null)
+                {
+                    n_Ordine = Ordine.Substring(0, 1);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Ordine non Valido");
             }
 
         }
@@ -70,104 +77,123 @@ namespace Utente_Macchina
         {
             while (true)
             {
-                Thread.Sleep(5000);
+                Thread.Sleep(10000);
                 byte[] msg = Encoding.ASCII.GetBytes("a;<EOF>");
                 int bytesSent = Sender.Send(msg);
                 // Scrivi();
 
-                this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Clear()));
-                this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna")));
 
                 string r;
                 Ordini o = new Ordini();
                 int bytesRec = Sender.Receive(bytes);
                 int Nlines = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 0, bytesRec));
+
+                    this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Clear()));
+                    this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna")));
+
                 for (int i = 0; i < Nlines; i++)
                 {
                     bytesRec = Sender.Receive(bytes);
                     r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
                     string[] v = r.Split(';');
+                   // MessageBox.Show(r);
                     o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
                     this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna)));
                 }
-                MessageBox.Show(Convert.ToString("gg"));
             }
 
         }
+        bool first=true;
         private void rjB_login_Click(object sender, EventArgs e)
         {
-
-            string r;
-
-            lsb_Ordini.Items.Clear();
-            lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna");
-            try
+            if (txt_NomeUtente.Text != "<EOF>" && txt_Password.Text != "<EOF>")
             {
-                //Creare classe ordini e fare separatore
-                ipAddress = System.Net.IPAddress.Parse("127.0.0.1");
-                remoteEP = new IPEndPoint(ipAddress, 5000);
-                Sender = new Socket(ipAddress.AddressFamily,
-                  SocketType.Stream, ProtocolType.Tcp);
-
-                try
+                if (txt_NomeUtente.Text != "" && txt_Password.Text != "")
                 {
-                    Sender.Connect(remoteEP);
-
-                    Console.WriteLine("Socket connected to {0}",
-                        Sender.RemoteEndPoint.ToString());
-
-
-                    byte[] msg = Encoding.ASCII.GetBytes(txt_NomeUtente.Text + ";" + txt_Password.Text + ";<EOF>");
-                    //Send
-                    int bytesSent = Sender.Send(msg);
-
-
-                    int bytesRec = Sender.Receive(bytes);
-                    r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                    if (Convert.ToInt32(r) == 0)
+                    string r;
+                    if (first)
                     {
-                        Form1 f = new Form1();
-                        login = true;
-                        panel1.Visible = false;
-                        // f.Show();
+                        lsb_Ordini.Items.Clear();
+                        lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna");
+                        first = false;
                     }
-                    else
+                    try
                     {
-                        MessageBox.Show("Utente o Password errati!", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    if (login)
-                    {
-                        msg = Encoding.ASCII.GetBytes("a;<EOF>");
-                        bytesSent = Sender.Send(msg);
-                        Console.WriteLine(r);
-                        Scrivi();
-                    }
-                    //controllo n ultimo ordine
-                    //Sender.Shutdown(SocketShutdown.Both);
-                    // Sender.Close();
+                        //Creare classe ordini e fare separatore
+                        ipAddress = System.Net.IPAddress.Parse("127.0.0.1");
+                        remoteEP = new IPEndPoint(ipAddress, 5000);
+                        Sender = new Socket(ipAddress.AddressFamily,
+                          SocketType.Stream, ProtocolType.Tcp);
 
+                        try
+                        {
+                            Sender.Connect(remoteEP);
+
+                            Console.WriteLine("Socket connected to {0}",
+                                Sender.RemoteEndPoint.ToString());
+
+
+                            byte[] msg = Encoding.ASCII.GetBytes(txt_NomeUtente.Text + ";" + txt_Password.Text + ";<EOF>");
+                            //Send
+                            int bytesSent = Sender.Send(msg);
+
+
+                            int bytesRec = Sender.Receive(bytes);
+                            r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                            if (Convert.ToInt32(r) == 0)
+                            {
+                                Form1 f = new Form1();
+                                login = true;
+                                panel1.Visible = false;
+                                // f.Show();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Utente o Password errati!", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                            if (login)
+                            {
+                                msg = Encoding.ASCII.GetBytes("a;<EOF>");
+                                bytesSent = Sender.Send(msg);
+                                Console.WriteLine(r);
+                                Scrivi();
+                            }
+                            //controllo n ultimo ordine
+                            //Sender.Shutdown(SocketShutdown.Both);
+                            // Sender.Close();
+
+                        }
+                        catch (ArgumentNullException ane)
+                        {
+                            MessageBox.Show(ane.ToString());
+                        }
+                        catch (SocketException se)
+                        {
+                            MessageBox.Show("IMPOSSIBILE RAGGIUNGERE IL SERVER");
+                        }
+                        catch (Exception exx)
+                        {
+                            MessageBox.Show(exx.ToString());
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                    //this.Hide();
+                    t = new Thread(aggiorna);
+                    t.IsBackground = true;
+                    t.Start();
                 }
-                catch (ArgumentNullException ane)
+                else
                 {
-                    MessageBox.Show(ane.ToString());
-                }
-                catch (SocketException se)
-                {
-                    MessageBox.Show("IMPOSSIBILE RAGGIUNGERE IL SERVER");
-                }
-                catch (Exception exx)
-                {
-                    MessageBox.Show(exx.ToString());
+                    MessageBox.Show("Valori non inseriti!", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            catch (Exception ex)
+            else
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("Valori non validi!", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            //this.Hide();
-            t = new Thread(aggiorna);
-            t.IsBackground = true;
-            t.Start();
         }
         private void Scrivi()
         {
@@ -185,14 +211,32 @@ namespace Utente_Macchina
                 o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
                 lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna);
             }
-            MessageBox.Show(Convert.ToString("gg"));
+            //MessageBox.Show(Convert.ToString("gg"));
         }
         private void rjB_Carica_Click(object sender, EventArgs e)
         {
             if (n_Ordine != null)
             {
-                byte[] msg = Encoding.ASCII.GetBytes("b;" + n_Ordine + ";" + txt_Macchina.Text + ";" + txt_Operatore.Text + ";" + txt_qntPezzi.Text + ";<EOF>");
-                int bytesSent = Sender.Send(msg);
+                if (txt_Macchina.Text != "<EOF>" && txt_qntPezzi.Text != "<EOF>" && txt_Operatore.Text != "<EOF>")
+                {
+                    if (txt_Macchina.Text != "" && txt_qntPezzi.Text != "" && txt_Operatore.Text != "")
+                    {
+                        byte[] msg = Encoding.ASCII.GetBytes("b;" + n_Ordine + ";" + txt_Macchina.Text + ";" + txt_Operatore.Text + ";" + txt_qntPezzi.Text + ";<EOF>");
+                        int bytesSent = Sender.Send(msg);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Valori non inseriti!", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Valori non validi!", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Ordine non selezionato!", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }

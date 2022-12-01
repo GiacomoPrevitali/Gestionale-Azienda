@@ -15,6 +15,7 @@ using System.IO;
 
 namespace Server
 {
+
     public partial class Form1 : Form
     {
         Ordini o = new Ordini();
@@ -117,6 +118,8 @@ public class ClientManager
     byte[] bytes = new Byte[1024];
     String data = "";
     Ordini[] o = new Ordini[100];
+    bool change = false;
+    int lines = 0;
     public ClientManager(Socket clientSocket)
     {
         this.clientSocket = clientSocket;
@@ -150,8 +153,10 @@ public class ClientManager
             }
             else if (info[0] == "b")
             {
+               // MessageBox.Show("1");
                 o[(Convert.ToInt32(info[1]) - 1)].ModificaOrdine(info);
-                aggiorna();
+                WriteAllFile();
+                change = true;
 
             }
             else if (info[0] == "c")
@@ -178,6 +183,17 @@ public class ClientManager
         clientSocket.Close();
         data = "";
 
+    }
+    public void WriteAllFile()
+    {
+        File.Delete(@"../../../File/Database.csv");
+      //  var writer = new StreamWriter(@"../../../File/Database.csv");
+        var writer = File.AppendText(@"../../../File/Database.csv");
+        for (int i = 0; i < lines; i++)
+        {
+            writer.WriteLine(o[i].Nordine + ";" + o[i].Npezzi + ";" + o[i].Cod + ";" + o[i].DataConsegna);
+        }
+        writer.Close();
     }
     public int Nordine()
     {
@@ -208,6 +224,12 @@ public class ClientManager
         writer.Close();
         byte[] msg = Encoding.ASCII.GetBytes("0");
         clientSocket.Send(msg);
+        change = true;
+    }
+    public void Remove()
+    {
+        //DA FARE
+        change = true;
     }
     public void aggiorna()
     {
@@ -257,18 +279,22 @@ public class ClientManager
         byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString(c));
         clientSocket.Send(msg);
     }
+    bool first = true;
     public void Send()
     {
         byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString(" "));
-        var reader = new StreamReader(@"../../../File/Database.csv");
-        int lines = 0;
-        while (reader.ReadLine() != null)
-        {
-            lines++;
-        }
-        reader.Close();
-        msg = Encoding.ASCII.GetBytes(Convert.ToString(lines));
-        clientSocket.Send(msg);
+
+           // MessageBox.Show("ggg");
+            var reader = new StreamReader(@"../../../File/Database.csv");
+        lines = 0;
+            while (reader.ReadLine() != null)
+            {
+                lines++;
+            }
+            reader.Close();
+
+            msg = Encoding.ASCII.GetBytes(Convert.ToString(lines));
+            clientSocket.Send(msg);
 
             var reader1 = new StreamReader(@"../../../File/Database.csv");
             int i = 0;
@@ -276,14 +302,17 @@ public class ClientManager
             {
                 var l = reader1.ReadLine();
                 string[] v = l.Split(';');
-                //MessageBox.Show(v[0] + " "+v[1] + " " + v[2] + " " + v[3]);
                 o[i].setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
-                MessageBox.Show(v[0] + " "+v[1] + " " + v[2] + " " + v[3]);
+                Thread.Sleep(10);
                 msg = Encoding.ASCII.GetBytes(Convert.ToString(l));
                 i++;
                 clientSocket.Send(msg);
             }
             reader1.Close();
+            change = false;
+            first = false;
+        
+
     }
 }
 
@@ -328,8 +357,9 @@ class Ordini
 
     public void Write(int Pr)
     {
-        var writer = new StreamWriter(@"../../../File/"+Cod+".csv");
-        writer.Write(Nordine+";"+Pr+";"+Npezzi+";"+Macchina+";"+Operatore+"");
+        //MessageBox.Show("£");
+        var writer = File.AppendText(@"../../../File/" + Cod + ".csv");
+        writer.WriteLine(Nordine + ";" + Pr + ";" + Npezzi + ";" + Macchina + ";" + Operatore + "");
         writer.Close();
     }
 
