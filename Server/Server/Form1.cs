@@ -96,18 +96,7 @@ namespace Server
             Console.WriteLine("\nPress ENTER to continue...");
             Console.Read();
         }
-        
-        private void Add()
-        {
-            string Codice = "tps11";
-            using (StreamWriter writetext = new StreamWriter(@"../../../File/Ordini/" + Codice +".csv"))
-            {
-                writetext.WriteLine(data);
-                //codice+pezzi+data di scadenza
 
-
-            }
-        }
     }
 }
 
@@ -169,6 +158,12 @@ public class ClientManager
             {
                 Add(info);
             }
+            else if (info[0] == "e")
+            {
+                MessageBox.Show(Convert.ToString(info[1]));
+                Remove(Convert.ToInt32(info[1]));
+                
+            }
             else
             {
                 string file = @"../../../File/Utenti.csv";
@@ -186,12 +181,17 @@ public class ClientManager
     }
     public void WriteAllFile()
     {
+        //aggiorna();
+        
         File.Delete(@"../../../File/Database.csv");
-      //  var writer = new StreamWriter(@"../../../File/Database.csv");
+        //  var writer = new StreamWriter(@"../../../File/Database.csv");
         var writer = File.AppendText(@"../../../File/Database.csv");
         for (int i = 0; i < lines; i++)
         {
-            writer.WriteLine(o[i].Nordine + ";" + o[i].Npezzi + ";" + o[i].Cod + ";" + o[i].DataConsegna);
+            if (o[i].Nordine > 0)
+            {
+                writer.WriteLine(o[i].Nordine + ";" + o[i].Npezzi + ";" + o[i].Cod + ";" + o[i].DataConsegna);
+            }
         }
         writer.Close();
     }
@@ -226,9 +226,14 @@ public class ClientManager
         clientSocket.Send(msg);
         change = true;
     }
-    public void Remove()
+    public void Remove(int r)
     {
-        //DA FARE
+        aggiorna();
+        r = r - 1;
+        MessageBox.Show(Convert.ToString(o[r].Nordine));
+        o[r].Nordine = 0;
+        MessageBox.Show(Convert.ToString(o[r].Nordine));
+        WriteAllFile();
         change = true;
     }
     public void aggiorna()
