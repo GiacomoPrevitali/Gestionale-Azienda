@@ -181,7 +181,6 @@ public class ClientManager
     }
     public void WriteAllFile()
     {
-        //aggiorna();
         
         File.Delete(@"../../../File/Database.csv");
         //  var writer = new StreamWriter(@"../../../File/Database.csv");
