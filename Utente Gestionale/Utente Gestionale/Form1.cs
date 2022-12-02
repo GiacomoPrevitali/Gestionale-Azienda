@@ -30,26 +30,6 @@ namespace Utente_Gestionale
         bool login = false;
         bool first = true;
 
-        private void btn_remove_Click(object sender, EventArgs e)
-        {
-            byte[] msg = Encoding.ASCII.GetBytes("e;" +n_Ordine+ ";<EOF>");
-            int bytesSent = Sender.Send(msg);
-        }
-
-        private void btn_Chiudi_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                byte[] msg = Encoding.ASCII.GetBytes("Quit$<EOF>");
-                //Send
-                int bytesSent = Sender.Send(msg);
-                this.Close();
-            }
-            catch
-            {
-                this.Close();
-            }
-        }
         private void btn_ChiudiL_Click(object sender, EventArgs e)
         {
             try
@@ -78,14 +58,12 @@ namespace Utente_Gestionale
         {
             while (true)
             {
-                //fare first
+                if (!first) {
                     Thread.Sleep(10000);
-
-                
+                }
+                                  
                 byte[] msg = Encoding.ASCII.GetBytes("a;<EOF>");
                 int bytesSent = Sender.Send(msg);
-                // Scrivi();
-
 
                 string r;
                 Ordini o = new Ordini();
@@ -103,6 +81,10 @@ namespace Utente_Gestionale
                     o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
                     this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna)));
                 }
+                if (first)
+                {
+                    first = false;
+                }
             }
         }
         private void rjB_AggOrdine_Click(object sender, EventArgs e)
@@ -116,10 +98,7 @@ namespace Utente_Gestionale
 
                     int bytesRec = Sender.Receive(bytes);
                     string r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                    if (r == "0")
-                    {
-                        MessageBox.Show("Ordine Aggiunto");
-                    }
+ 
                     txt_scadenza.Text = "";
                     txt_Pezzi.Text = "";
                     txt_cod.Text = "";
@@ -144,7 +123,6 @@ namespace Utente_Gestionale
                     string r;
                     try
                     {
-                        //Creare classe ordini e fare separatore
                         ipAddress = System.Net.IPAddress.Parse("127.0.0.1");
                         remoteEP = new IPEndPoint(ipAddress, 5000);
                         Sender = new Socket(ipAddress.AddressFamily,
@@ -168,7 +146,6 @@ namespace Utente_Gestionale
                             if (Convert.ToInt32(r) == 0)
                             {
                                 Form1 f = new Form1();
-                                MessageBox.Show("ggggg", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 panel1.Visible = false;
                                 login = true;
                                 // f.Show();
@@ -227,6 +204,24 @@ namespace Utente_Gestionale
             catch
             {
                 MessageBox.Show("Ordine non Valido");
+            }
+        }
+        private void rjB_Rimuovi_Click(object sender, EventArgs e)
+        {
+            byte[] msg = Encoding.ASCII.GetBytes("e;" + n_Ordine + ";<EOF>");
+            int bytesSent = Sender.Send(msg);
+        }
+        private void bottoni2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                byte[] msg = Encoding.ASCII.GetBytes("Quit$<EOF>");
+                int bytesSent = Sender.Send(msg);
+                this.Close();
+            }
+            catch
+            {
+                this.Close();
             }
         }
     }

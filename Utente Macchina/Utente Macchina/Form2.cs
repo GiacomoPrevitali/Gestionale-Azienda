@@ -8,9 +8,9 @@ using System.Windows.Forms;
 
 namespace Utente_Macchina
 {
-    public partial class Form2 : Form
+    public partial class Macchina : Form
     {
-        public Form2()
+        public Macchina()
         {
             InitializeComponent();
         }
@@ -45,11 +45,6 @@ namespace Utente_Macchina
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void lsb_Ordini_SelectedIndexChanged(object sender, EventArgs e)
         {
             try
@@ -75,31 +70,38 @@ namespace Utente_Macchina
 
         private void aggiorna()
         {
-            while (true)
+            try
             {
-                Thread.Sleep(10000);
-                byte[] msg = Encoding.ASCII.GetBytes("a;<EOF>");
-                int bytesSent = Sender.Send(msg);
-                // Scrivi();
+                while (true)
+                {
+                    Thread.Sleep(10000);
+                    byte[] msg = Encoding.ASCII.GetBytes("a;<EOF>");
+                    int bytesSent = Sender.Send(msg);
+                    // Scrivi();
 
 
-                string r;
-                Ordini o = new Ordini();
-                int bytesRec = Sender.Receive(bytes);
-                int Nlines = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 0, bytesRec));
+                    string r;
+                    Ordini o = new Ordini();
+                    int bytesRec = Sender.Receive(bytes);
+                    int Nlines = Convert.ToInt32(Encoding.ASCII.GetString(bytes, 0, bytesRec));
 
                     this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Clear()));
                     this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add("Ordine     Pezzi        Codice        Data consegna")));
 
-                for (int i = 0; i < Nlines; i++)
-                {
-                    bytesRec = Sender.Receive(bytes);
-                    r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                    string[] v = r.Split(';');
-                   // MessageBox.Show(r);
-                    o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
-                    this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna)));
+                    for (int i = 0; i < Nlines; i++)
+                    {
+                        bytesRec = Sender.Receive(bytes);
+                        r = Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                        string[] v = r.Split(';');
+                        // MessageBox.Show(r);
+                        o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
+                        this.Invoke((MethodInvoker)(() => lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna)));
+                    }
                 }
+            }
+            catch
+            {
+                MessageBox.Show("Server non raggiungibile", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
         }
@@ -158,7 +160,6 @@ namespace Utente_Macchina
                                 Console.WriteLine(r);
                                 Scrivi();
                             }
-                            //controllo n ultimo ordine
                             //Sender.Shutdown(SocketShutdown.Both);
                             // Sender.Close();
 
@@ -180,7 +181,6 @@ namespace Utente_Macchina
                     {
                         MessageBox.Show(ex.Message);
                     }
-                    //this.Hide();
                     t = new Thread(aggiorna);
                     t.IsBackground = true;
                     t.Start();
@@ -211,7 +211,6 @@ namespace Utente_Macchina
                 o.setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
                 lsb_Ordini.Items.Add(o.Nordine + "             " + o.Npezzi + "             " + o.Cod + "        " + o.DataConsegna);
             }
-            //MessageBox.Show(Convert.ToString("gg"));
         }
         private void rjB_Carica_Click(object sender, EventArgs e)
         {
@@ -223,6 +222,9 @@ namespace Utente_Macchina
                     {
                         byte[] msg = Encoding.ASCII.GetBytes("b;" + n_Ordine + ";" + txt_Macchina.Text + ";" + txt_Operatore.Text + ";" + txt_qntPezzi.Text + ";<EOF>");
                         int bytesSent = Sender.Send(msg);
+                        txt_Macchina.Text = "";
+                        txt_qntPezzi.Text = "";
+                        txt_Operatore.Text = "";
                     }
                     else
                     {
@@ -240,8 +242,7 @@ namespace Utente_Macchina
             }
 
         }
-
-        private void button1_Click_1(object sender, EventArgs e)
+        private void rjB_Chiudi_Click(object sender, EventArgs e)
         {
             try
             {
@@ -256,7 +257,6 @@ namespace Utente_Macchina
 
 
                 byte[] msg = Encoding.ASCII.GetBytes("Quit$<EOF>");
-                //Send
                 int bytesSent = Sender.Send(msg);
                 this.Close();
             }

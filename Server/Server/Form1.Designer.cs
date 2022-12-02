@@ -35,9 +35,9 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(229, 52);
+            this.button1.Location = new System.Drawing.Point(268, 30);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(75, 36);
             this.button1.TabIndex = 0;
             this.button1.Text = "AVVIA";
             this.button1.UseVisualStyleBackColor = true;
@@ -48,7 +48,7 @@
             this.lbl_Stato.AutoSize = true;
             this.lbl_Stato.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbl_Stato.ForeColor = System.Drawing.Color.Red;
-            this.lbl_Stato.Location = new System.Drawing.Point(28, 36);
+            this.lbl_Stato.Location = new System.Drawing.Point(28, 27);
             this.lbl_Stato.Name = "lbl_Stato";
             this.lbl_Stato.Size = new System.Drawing.Size(126, 39);
             this.lbl_Stato.TabIndex = 1;
@@ -69,11 +69,13 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(376, 154);
+            this.ClientSize = new System.Drawing.Size(376, 92);
             this.Controls.Add(this.lbl_User);
             this.Controls.Add(this.lbl_Stato);
             this.Controls.Add(this.button1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.MaximumSize = new System.Drawing.Size(392, 131);
+            this.MinimumSize = new System.Drawing.Size(392, 131);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);

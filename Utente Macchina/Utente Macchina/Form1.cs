@@ -21,7 +21,7 @@ namespace Utente_Macchina
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            Form2 f = new Form2();
+            Macchina f = new Macchina();
             //gestire data di scadenza
             lsB_Ordini.Items.Add("N° Ordine                 Pezzi da produrre              Data di Scasenza ");
             lsB_Ordini.Items.Add("1                             500                            28/11/2022 ");

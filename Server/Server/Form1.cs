@@ -69,8 +69,6 @@ namespace Server
 
                 while (true)
                 {
-                    //FARE CONTO USER
-                    //CHIUDERE TUTTO QUANDO PREMI x
                     Console.WriteLine("Waiting for a connection...");
 
                     Socket handler = listener.Accept();
@@ -83,10 +81,7 @@ namespace Server
                     t.Start();
                     User--;
                     lbl_User.Text = "Utenti Connessi: "+Convert.ToString(User);
-
-
                 }
-
             }
             catch (Exception e)
             {
@@ -96,18 +91,15 @@ namespace Server
             Console.WriteLine("\nPress ENTER to continue...");
             Console.Read();
         }
-
     }
 }
 
 public class ClientManager
 {
-
     Socket clientSocket;
     byte[] bytes = new Byte[1024];
     String data = "";
     Ordini[] o = new Ordini[100];
-    bool change = false;
     int lines = 0;
     public ClientManager(Socket clientSocket)
     {
@@ -116,7 +108,6 @@ public class ClientManager
 
     public void doClient()
     {
-        bool check = false;
         int c = -2;
         for(int i=0; i<o.Length; i++)
         {
@@ -133,7 +124,6 @@ public class ClientManager
             }
             byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString(c));
             string[] info = data.Split(';');
-            //login();
             if (info[0] == "a")
             {
 
@@ -142,11 +132,12 @@ public class ClientManager
             }
             else if (info[0] == "b")
             {
-               // MessageBox.Show("1");
                 o[(Convert.ToInt32(info[1]) - 1)].ModificaOrdine(info);
+                if (o[(Convert.ToInt32(info[1]) - 1)].Npezzi <= 0)
+                {
+                    Remove((Convert.ToInt32(info[1])));
+                }
                 WriteAllFile();
-                change = true;
-
             }
             else if (info[0] == "c")
             {
@@ -160,9 +151,7 @@ public class ClientManager
             }
             else if (info[0] == "e")
             {
-                MessageBox.Show(Convert.ToString(info[1]));
-                Remove(Convert.ToInt32(info[1]));
-                
+                Remove(Convert.ToInt32(info[1]));  
             }
             else
             {
@@ -173,7 +162,6 @@ public class ClientManager
 
             Console.WriteLine("Messaggio ricevuto : {0}", data);
         }
-        MessageBox.Show("cc");
         clientSocket.Shutdown(SocketShutdown.Both);
         clientSocket.Close();
         data = "";
@@ -181,9 +169,7 @@ public class ClientManager
     }
     public void WriteAllFile()
     {
-        
         File.Delete(@"../../../File/Database.csv");
-        //  var writer = new StreamWriter(@"../../../File/Database.csv");
         var writer = File.AppendText(@"../../../File/Database.csv");
         for (int i = 0; i < lines; i++)
         {
@@ -204,15 +190,11 @@ public class ClientManager
         }
         string[] v = l.Split(';');
         reader1.Close();
-        MessageBox.Show(v[0]);
         if (v[0] == "")
         {
             v[0] = "0";
         }
-
-        MessageBox.Show(v[0]);
         return Convert.ToInt32(v[0]);
-
     }
     public void Add(string[] info)
     {
@@ -223,21 +205,16 @@ public class ClientManager
         writer.Close();
         byte[] msg = Encoding.ASCII.GetBytes("0");
         clientSocket.Send(msg);
-        change = true;
     }
     public void Remove(int r)
     {
-        //aggiorna();
         r = r - 1;
-        MessageBox.Show(Convert.ToString(o[r].Nordine));
         o[r].Nordine = 0;
         for(int i = r; i < lines; i++)
         {
             o[i].Nordine = o[i].Nordine-1;
         }
-        MessageBox.Show(Convert.ToString(o[r].Nordine));
         WriteAllFile();
-        change = true;
     }
     public void aggiorna()
     {
@@ -287,48 +264,36 @@ public class ClientManager
         byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString(c));
         clientSocket.Send(msg);
     }
-    bool first = true;
     public void Send()
     {
         byte[] msg = Encoding.ASCII.GetBytes(Convert.ToString(" "));
 
-           // MessageBox.Show("ggg");
-            var reader = new StreamReader(@"../../../File/Database.csv");
+        var reader = new StreamReader(@"../../../File/Database.csv");
         lines = 0;
-            while (reader.ReadLine() != null)
-            {
-                lines++;
-            }
-            reader.Close();
+        while (reader.ReadLine() != null)
+        {
+            lines++;
+        }
+        reader.Close();
 
-            msg = Encoding.ASCII.GetBytes(Convert.ToString(lines));
+        msg = Encoding.ASCII.GetBytes(Convert.ToString(lines));
+        clientSocket.Send(msg);
+
+        var reader1 = new StreamReader(@"../../../File/Database.csv");
+        int i = 0;
+        while (!reader1.EndOfStream)
+        {
+            var l = reader1.ReadLine();
+            string[] v = l.Split(';');
+            o[i].setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
+            Thread.Sleep(10);
+            msg = Encoding.ASCII.GetBytes(Convert.ToString(l));
+            i++;
             clientSocket.Send(msg);
-
-            var reader1 = new StreamReader(@"../../../File/Database.csv");
-            int i = 0;
-            while (!reader1.EndOfStream)
-            {
-                var l = reader1.ReadLine();
-                string[] v = l.Split(';');
-                o[i].setOrdine(Convert.ToInt32(v[0]), Convert.ToInt32(v[1]), v[2], v[3]);
-                Thread.Sleep(10);
-                msg = Encoding.ASCII.GetBytes(Convert.ToString(l));
-                i++;
-                clientSocket.Send(msg);
-            }
-            reader1.Close();
-            change = false;
-            first = false;
-        
-
+        }
+        reader1.Close();
     }
 }
-
-//SI CONNETTE TRAMITE UN LOGIN
-//LO ACCETTA E GLI MANDA GLI ORDINI
-//SELEZIONA, E RITORNA LE MODIFICHE
-//IL SERVER ACCETTA E MODIFICA I DATI
-//LA CONNESSIONE SI CHIUDE
 
 class Ordini
 {
@@ -346,7 +311,6 @@ class Ordini
         Cod = "";
         DataConsegna = "";
     }
-
     public void setOrdine(int No, int Np, string C, string Dc)
     {
         Nordine = No;
@@ -362,10 +326,8 @@ class Ordini
         Npezzi = Npezzi - Convert.ToInt32(info[4]);
         Write(Convert.ToInt32(info[4]));
     }
-
     public void Write(int Pr)
     {
-        //MessageBox.Show("£");
         var writer = File.AppendText(@"../../../File/" + Cod + ".csv");
         writer.WriteLine(Nordine + ";" + Pr + ";" + Npezzi + ";" + Macchina + ";" + Operatore + "");
         writer.Close();
