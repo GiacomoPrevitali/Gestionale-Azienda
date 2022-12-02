@@ -227,10 +227,14 @@ public class ClientManager
     }
     public void Remove(int r)
     {
-        aggiorna();
+        //aggiorna();
         r = r - 1;
         MessageBox.Show(Convert.ToString(o[r].Nordine));
         o[r].Nordine = 0;
+        for(int i = r; i < lines; i++)
+        {
+            o[i].Nordine = o[i].Nordine-1;
+        }
         MessageBox.Show(Convert.ToString(o[r].Nordine));
         WriteAllFile();
         change = true;
